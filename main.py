@@ -1,13 +1,14 @@
 import random
 import threading
 from temp import Timer
+import on 
 t =Timer
 stop=True
 def simulacion(): 
     while stop:
         state=random.randint(0,2)
         if(state==1):
-            print("entra en on")
+            on.isOn()
         else:
             print("entro en off")
 
