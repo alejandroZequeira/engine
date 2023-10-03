@@ -8,5 +8,4 @@ class Timer:
         while(t>0):
             time.sleep(1)
             t-=1
-        print("acabo el tiempo")
         return False
