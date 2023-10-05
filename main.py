@@ -3,8 +3,16 @@ import threading
 from temp import Timer
 import time 
 t =Timer
+
 global stop
+global statsTime,statsPkt
+statsTime=[]
+statsPkt=[]
 stop=True
+
+def pktGenerator():
+    pktSize=random.randint(1,20)
+    return pktSize
 
 def on(tOn,t):
     tActual= t.timeNow(t)
