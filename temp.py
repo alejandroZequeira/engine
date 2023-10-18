@@ -12,9 +12,9 @@ class Timer:
     
     def istime(ts):
         global t
-        tsim=ts*1000
-        for i in range(1,tsim+1):
-            time.sleep(1/1000)
+        tsim=ts
+        for i in range(1,tsim):
+            t=i*1000
+            time.sleep(1)
             #print(i)
-            t=i
         return False
