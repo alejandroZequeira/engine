@@ -1,9 +1,10 @@
 import random
+import numpy as np
 import threading
 from temp import Timer
 import time 
 import matplotlib.pyplot as plt
-import json
+#import json
 global t
 t =Timer
 
@@ -12,7 +13,7 @@ global stop
 global stats_time,stats_pkt,cola,t_arribo,pkr_size_max,pkt_size_min, m_vEnlace,time_simulacion
 pkt_size_max=20000
 pkt_size_min=10000
-time_simulacion=20
+time_simulacion=100
 t_arribo=20
 stats_time=[]
 stats_pkt=[]
@@ -21,6 +22,17 @@ stop=True
 #funcion generadora de numeros aleatorios
 def dado(max,min):
     return random.randint(max,min)
+#distribucion exponencial 
+def dado_exp_cota(max,min,m):
+    while True:
+        time_exp=np.random.exponential(1/m,100)
+        for s in time_exp:
+            if (s>=min and s<=max):
+                return s
+def dado_exp(max,min,m):
+    while True:
+        time_exp=np.random.exponential(1/m,100)
+        return time_exp[0]
 #generador de paquetes
 def pktGenerator(max , min):
     pktSize=random.randint(min,max)
@@ -28,17 +40,15 @@ def pktGenerator(max , min):
 #funcion on
 def on(time_on):
     global cola,pkt_size_max,pkt_size_min,stop,t
-    tActual= t.timeNow()
     print("ento en on y durara hasta el segundo", time_on/1000)
-    while tActual >0:
+    while t.timeNow() < time_on:
         if stop==False:
             break
-        if (tActual+t_arribo)<time_on:
+        if (t.timeNow()+t_arribo)<time_on:
             pktsize=pktGenerator(pkt_size_max,pkt_size_min)
             cola.append(pktsize)
             set_stats_pkt(t.timeNow()/1000)
-        time.sleep((t_arribo)/1000)
-        tActual=time_on -t.timeNow()
+        time.sleep(t_arribo/1000)
         #print("tiempo actual",tActual/1000)
 
 #funciones para reuinir estadisticas
@@ -65,35 +75,37 @@ def trafic_generator():
     global stop,t,time_simulacion
     cont_time_on=0 
     cont_time_off=0
-    time_on=dado(1,3)
-    time_off=dado(1,3)
     state=dado(0,2)  
     while stop:
-        if(state!=1):
-            if time_off<time_simulacion:
+        time_on=dado_exp(5,1,3)
+        time_off=dado_exp(5,1,3)
+        print("tiempo con distribucion exponencial ",time_on)
+        if(state!=0):
+            if (time_off+(t.timeNow()/1000))<time_simulacion:
                 set_stats_time("off",t.timeNow()/1000,(t.timeNow()/1000)+time_off)
+                print("valor de tiempo que debe durar en off (seg):",time_off)
                 time.sleep(time_off)
-                print("duro hasta el segundo en off: ",(t.timeNow()/1000)+time_off)
+                print("duro hasta el segundo en off: ",(t.timeNow()/1000))
                 cont_time_off+=1    
-            if time_on<time_simulacion:
+            if (time_on+(t.timeNow()/1000))<time_simulacion:
+                print("tiempo en que inicia on en segundos",t.timeNow()/1000)
+                print("valor de tiempo que debe durar en on (seg):",time_on)
                 set_stats_time("on",t.timeNow()/1000,(t.timeNow()/1000)+time_on)
                 on((time_on*1000)+t.timeNow())
                 print("duro hasta el segundo en on: ",(t.timeNow()/1000)+time_on)
                 cont_time_on+=1
         else:
-            if time_on<time_simulacion:
+            if (time_on+(t.timeNow()/1000))<time_simulacion:
                 set_stats_time("on",t.timeNow()/1000,(t.timeNow()/1000)+time_on)
                 on((time_on*1000)+t.timeNow())
                 print("duro en on: ",time_on)
                 cont_time_on+=1
 
-            if time_off<time_simulacion:
+            if (time_off+(t.timeNow()/1000))<time_simulacion:
                 set_stats_time("off",t.timeNow()/1000,(t.timeNow()/1000)+time_off)
                 time.sleep(time_off)
                 print("duro en off: ",time_off)
                 cont_time_off+=1
-        time_on=dado(1,3)
-        time_off=dado(1,3)
        # print("simulando")
     print("entro a on: ",cont_time_on)
     print("entro a off: ",cont_time_off)
@@ -105,20 +117,22 @@ def service():
     while(stop):
         #print("procesando paquete")
         cont+=1
-
+def cronometro():
+    global stop,time_simulacion
+    stop=t.istime(time_simulacion)
 #simulador
 if __name__== '__main__':
-    thread = threading.Thread(target=trafic_generator)
+    thread = threading.Thread(target=cronometro)
     thread.start()
     #thread2= threading.Thread(target=service)
     #thread2.start()
-    stop=t.istime(time_simulacion)
+    trafic_generator()
     #print(stats_time)
     #print(stats_pkt)
     argx=[]
     argy=[]
     for s in stats_time:
-        print(s)
+       # print(s)
         if s['etq'] =="on":
             argx.append( s['tiempo_inicial'])
             argy.append(10)

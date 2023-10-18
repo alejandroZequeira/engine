@@ -12,9 +12,16 @@ class Timer:
     
     def istime(ts):
         global t
-        tsim=ts
-        for i in range(1,tsim):
-            t=i*1000
-            time.sleep(1)
-            #print(i)
+        sigue=True
+        tsim=ts*1000
+        start_time=time.time()
+        while sigue:
+            elapsed_time = time.time() - start_time
+            milisegundos = int(elapsed_time * 1000)
+            if tsim>milisegundos:
+                t=milisegundos
+            else:
+                sigue=False
+            time.sleep(0.001)
+        print("termino el tiempo")
         return False
