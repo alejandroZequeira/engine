@@ -1,27 +1,63 @@
 import time 
 
 class Timer:
-    global t
-    t=0
+    global ms,sg, mn,stop
+    ms=0
+    sg=0
+    mn=0
+    stop=False
     def __init__(self):
-        self.t=0
+        self.ms=0
+        self.sg=0
+        self.mn=0
+    def now_seg():
+        global sg
+        return sg
     
-    def timeNow():
-        global t
-        return t    
+    def now_min():
+        global mn
+        return mn
     
+    def now():
+        global ms
+        return ms    
+    def sleep_ms(s):
+        global ms
+        while True:
+            if stop:
+                break
+            if s<ms:
+                break
+        
+    def sleep_sg(s):
+        global sg
+        while True:
+            if stop:
+                break
+            if s<sg:
+                break
     def istime(ts):
-        global t
+        global ms,sg,mn,stop
         sigue=True
-        tsim=ts*1000
-        start_time=time.time()
+        tsim=ts*60
+        milisegundos=0
+        #start_time=time.time()
         while sigue:
-            elapsed_time = time.time() - start_time
-            milisegundos = int(elapsed_time * 1000)
-            if tsim>milisegundos:
-                t=milisegundos
+            #elapsed_time=time.time()-start_time
+             #int (elapsed_time*1000)
+            segundos=milisegundos/1000
+            minutos=segundos/60
+            if tsim>segundos:
+                ms=milisegundos                
+                sg=segundos
+                mn=minutos
+                #print("tiempo actual ", segundos)
             else:
+                print("se acabo el tiempo")
                 sigue=False
-            time.sleep(0.001)
+                stop=True
+            #elapsed_time+=1
+            time.sleep(0.000001)
+            milisegundos +=1
         print("termino el tiempo")
         return False
